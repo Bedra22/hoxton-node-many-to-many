@@ -31,7 +31,7 @@ JOIN interviews ON interviewers.id=interviews.interviewersId
  WHERE interviews.applicantsId=@applicantsId; 
 `)
 
-const applicantsInterviewedByIntervewrs = db.prepare(`
+const applicantsInterviewedByInteviewers = db.prepare(`
 SELECT applicants.* FROM applicants 
 JOIN interviews ON applicants.id=interviews.applicantsId
 WHERE interviews.interviewersId=@interviewersId;
@@ -55,6 +55,19 @@ app.get('/applicants/:id', (req, res) => {
     }
 })
 
+app.get('/interviewers/:id', (req, res) => {
+
+    const interviewer = getInterviewersById.get(req.params)
+
+    if (interviewer) {
+        interviewer.interview = getInterviewDoneForInterviewers.all({ interviewersId: interviewer.id })
+        interviewer.applicant = applicantsInterviewedByInteviewers.all({ interviewersId: interviewer.id })
+        res.send(interviewer)
+    } else {
+        res.status(404).send("Interviewer not found")
+    }
+})
+
 app.listen(port, () => {
-    console.log(`App is runngind on http://localhost:${port}/`)
+    console.log(`App runs on http://localhost:${port}/`)
 })

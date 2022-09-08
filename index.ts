@@ -17,6 +17,10 @@ const getApplicantsById = db.prepare(`
 SELECT * FROM applicants WHERE id=@id;
 `)
 
+const getInterviewById = db.prepare(`
+SELECT * FROM interviews WHERE id=@id;
+`)
+
 const getInterviewDoneByApplicants = db.prepare(`
 SELECT * FROM interviews WHERE applicantsId=@applicantsId;
 `)
@@ -124,6 +128,36 @@ app.post('/interviewers', (req, res) => {
         interviewer.applicant = applicantsInterviewedByInteviewers.all({ interviewersId: interviewer.id })
         res.send(interviewer)
 
+    } else {
+        res.status(404).send(errors)
+    }
+})
+
+app.post('/interviews', (req, res) => {
+
+    let errors: string[] = []
+
+    if (typeof req.body.applicantsId != 'number') {
+        errors.push("ApplicantsId is not a number or not found")
+    }
+
+    if (typeof req.body.interviewersId != 'number') {
+        errors.push("InterviewersId is not a number or not found")
+    }
+
+    if (typeof req.body.date != 'string') {
+        errors.push("Date is not a string or not found")
+    }
+
+    if (typeof req.body.score != 'number') {
+        errors.push("Score is not a number or not found")
+    }
+
+    if (errors.length === 0) {
+
+        const info = addNewInterviewsInTable.run(req.body)
+        const interview = getInterviewById.all({ id: info.lastInsertRowid })
+        res.send(interview)
     } else {
         res.status(404).send(errors)
     }

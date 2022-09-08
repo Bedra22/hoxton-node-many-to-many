@@ -37,6 +37,19 @@ JOIN interviews ON applicants.id=interviews.applicantsId
 WHERE interviews.interviewersId=@interviewersId;
 `)
 
+const addNewApplicationInTable = db.prepare(`
+INSERT INTO applicants (name,email) VALUES (@name,@email)
+`)
+
+const addNewInterviewersInTable = db.prepare(`
+INSERT INTO interviewers (name,email) VALUES (@name,@email)
+`)
+
+
+const addNewInterviewsInTable = db.prepare(`
+INSERT INTO interviews (applicantsId,interviewersId, date, score) VALUES (@applicantsId,@interviewersId,@date,@score)
+`)
+
 app.get('/', (req, res) => {
     res.send(`<h1>Yayyy</h1>`)
 })
@@ -67,6 +80,44 @@ app.get('/interviewers/:id', (req, res) => {
         res.status(404).send("Interviewer not found")
     }
 })
+
+app.post('/applicants', (req, res) => {
+
+    let errors: string[] = []
+
+    if (typeof req.body.name != 'string') {
+        errors.push("Name not found or is not a string")
+    }
+
+    if (typeof req.body.email != 'string') {
+        errors.push("Email not found or is not a string")
+    }
+
+    if (errors.length === 0) {
+        const info = addNewApplicationInTable.run(req.body)
+        const applicant = getApplicantsById.get({ id: info.lastInsertRowid })
+        applicant.interview = getInterviewDoneByApplicants.all({ applicantsId: applicant.id })
+        applicant.interviewers = interviewersThatInterviewedApplicants.all({ applicantsId: applicant.id })
+        res.send(applicant)
+
+    } else {
+        res.status(404).send(errors)
+    }
+})
+
+app.post('/interviewers', (req, res) => {
+
+    let errors: string[] = []
+
+    if (typeof req.body.name != 'string') {
+        errors.push("Name not found or is not a string")
+    }
+
+    if (typeof req.body.email != 'string') {
+        errors.push("Email not found or is not a string")
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`App runs on http://localhost:${port}/`)

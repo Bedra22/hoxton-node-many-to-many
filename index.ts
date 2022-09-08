@@ -116,6 +116,17 @@ app.post('/interviewers', (req, res) => {
     if (typeof req.body.email != 'string') {
         errors.push("Email not found or is not a string")
     }
+
+    if (errors.length === 0) {
+        const info = addNewInterviewersInTable.run(req.body)
+        const interviewer = getInterviewersById.get({ id: info.lastInsertRowid })
+        interviewer.interview = getInterviewDoneForInterviewers.all({ interviewersId: interviewer.id })
+        interviewer.applicant = applicantsInterviewedByInteviewers.all({ interviewersId: interviewer.id })
+        res.send(interviewer)
+
+    } else {
+        res.status(404).send(errors)
+    }
 })
 
 

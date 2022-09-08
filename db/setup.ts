@@ -112,8 +112,8 @@ for (let interviewer of interviewers) {
 const createInterviewsTable = db.prepare(`
 CREATE TABLE IF NOT EXISTS interviews (
     id INTEGER,
-    applicantsId INTEGER,
-    interviewersId INTEGER,
+    applicantsId INTEGER NOT NULL,
+    interviewersId INTEGER NOT NULL,
     date TEXT,
     score INTEGER,
     PRIMARY KEY (id),

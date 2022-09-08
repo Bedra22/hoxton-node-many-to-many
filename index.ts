@@ -37,7 +37,23 @@ JOIN interviews ON applicants.id=interviews.applicantsId
 WHERE interviews.interviewersId=@interviewersId;
 `)
 
+app.get('/', (req, res) => {
+    res.send(`<h1>Yayyy</h1>`)
+})
 
+
+app.get('/applicants/:id', (req, res) => {
+
+    const applicant = getApplicantsById.get(req.params)
+
+    if (applicant) {
+        applicant.interview = getInterviewDoneByApplicants.all({ applicantsId: applicant.id })
+        applicant.interviewers = interviewersThatInterviewedApplicants.all({ applicantsId: applicant.id })
+        res.send(applicant)
+    } else {
+        res.status(404).send("Applicant not found")
+    }
+})
 
 app.listen(port, () => {
     console.log(`App is runngind on http://localhost:${port}/`)
